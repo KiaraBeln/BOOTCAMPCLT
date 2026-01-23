@@ -24,14 +24,14 @@ jobs:
           dotnet-version: "8.0.x"
 
       - name: Restore
-        run: dotnet restore api.bootcamp.clt/Api.BootCamp.sln
-
+        run: dotnet restore Api.BootCamp.sln
+        
       - name: Build
-        run: dotnet build ./BootcampCLT.sln -c Release --no-restore
+        run: dotnet build Api.BootCamp.sln -c Release --no-restore
 
       - name: Test
-        run: dotnet test ./BootcampCLT.sln -c Release --no-build
-
+        run: dotnet test Api.BootCamp.sln -c Release --no-build
+        
       - name: Login Docker Hub
         uses: docker/login-action@v3
         with:
