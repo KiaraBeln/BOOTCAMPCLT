@@ -1,5 +1,4 @@
-﻿using Api.BootCamp.Api.Request;
-using Api.BootCamp.Api.Response;
+﻿using Api.BootCamp.Api.Response;
 using Api.BootCamp.Aplication.Command.CreateProduct;
 using Api.BootCamp.Aplication.Command.DeleteProducto;
 using Api.BootCamp.Aplication.Query.GetProductById;
@@ -10,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Api.BootCamp.Api.Controllers;
 
 [ApiController]
-[Route("api/v1/productos")]
+[Route("v1/api/productos")]
 public class ProductosController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -41,54 +40,33 @@ public class ProductosController : ControllerBase
         var result = await _mediator.Send(new GetProductoByIdQuery(id));
 
         if (result is null)
-            return NotFound();
+            return NotFound($"Producto con id {id} no encontrado");
 
         return Ok(result);
     }
 
     [HttpPost]
     [ProducesResponseType(typeof(ProductoResponse), StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Create([FromBody] CreateProductoRequest request)
+    public async Task<IActionResult> Create([FromBody] CreateProductoCommand command)
     {
-        var command = new CreateProductoCommand(
-            request.Codigo,
-            request.Nombre,
-            request.Descripcion,
-            request.Precio,
-            request.CategoriaId,
-            request.CantidadStock
-        );
-
         var result = await _mediator.Send(command);
 
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
-
     [HttpPut("{id:int}")]
     [ProducesResponseType(typeof(ProductoResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Update(
-        [FromRoute] int id,
-        [FromBody] UpdateProductoRequest request)
+    public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateProductoCommand command)
     {
-        var command = new UpdateProductoCommand(
-            id,
-            request.Codigo,
-            request.Nombre,
-            request.Descripcion,
-            request.Precio,
-            request.Activo,
-            request.CategoriaId,
-            request.CantidadStock
-        );
+        if (id != command.Id)
+            return BadRequest("El id de la ruta no coincide con el id del cuerpo");
 
         var result = await _mediator.Send(command);
 
         if (result is null)
-            return NotFound();
+            return NotFound($"Producto con id {id} no encontrado");
 
         return Ok(result);
     }
@@ -97,29 +75,18 @@ public class ProductosController : ControllerBase
     [ProducesResponseType(typeof(ProductoResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Patch(
-    [FromRoute] int id,
-    [FromBody] PatchProductoRequest request)
+    public async Task<IActionResult> Patch([FromRoute] int id, [FromBody] PatchProductoCommand command)
     {
-        var command = new PatchProductoCommand(
-            id,
-            request.Codigo,
-            request.Nombre,
-            request.Descripcion,
-            request.Precio,
-            request.Activo,
-            request.CategoriaId,
-            request.CantidadStock
-        );
+        if (id != command.Id)
+            return BadRequest("El id de la ruta no coincide con el id del cuerpo");
 
         var result = await _mediator.Send(command);
 
         if (result is null)
-            return NotFound();
+            return NotFound($"Producto con id {id} no encontrado");
 
         return Ok(result);
     }
-
 
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -129,7 +96,7 @@ public class ProductosController : ControllerBase
         var result = await _mediator.Send(new DeleteProductoCommand(id));
 
         if (!result)
-            return NotFound();
+            return NotFound($"Producto con id {id} no encontrado");
 
         return NoContent();
     }

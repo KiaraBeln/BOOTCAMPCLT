@@ -20,16 +20,10 @@ public class DeleteProductoHandler : IRequestHandler<DeleteProductoCommand, bool
     public async Task<bool> Handle(DeleteProductoCommand request, CancellationToken cancellationToken)
     {
         var entity = await _repository.GetByIdAsync(request.Id, cancellationToken);
-        _logger.LogInformation(
-    "Eliminando producto Id={Id}",
-    request.Id
-);
+        _logger.LogInformation( "Eliminando producto Id={Id}", request.Id);
         if (entity is null)
         {
-            _logger.LogWarning(
-                "Delete fallido. Producto no encontrado Id={Id}",
-                request.Id
-            );
+            _logger.LogWarning( "Delete fallido. Producto no encontrado Id={Id}",request.Id );
             return false;
         }
 ;
@@ -37,7 +31,7 @@ public class DeleteProductoHandler : IRequestHandler<DeleteProductoCommand, bool
         entity.Activo = false;
         entity.FechaActualizacion = DateTime.UtcNow;
 
-        await _repository.SaveChangesAsync(cancellationToken);
+        await _repository.UpdateAsync(entity, cancellationToken);
 
         return true;
     }
